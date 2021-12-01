@@ -1,13 +1,13 @@
-package com.usa.reto1;
+package com.reto2;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class Reto1Application {
+public class Reto2Application {
 
     public static void main(String[] args) {
-        SpringApplication.run(Reto1Application.class, args);
+        SpringApplication.run(Reto2Application.class, args);
     }
 
 }
