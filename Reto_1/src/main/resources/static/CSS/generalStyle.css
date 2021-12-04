@@ -1,0 +1,30 @@
+body {
+    display: flex;
+    justify-content: center;
+    padding: 3em 0;
+}
+
+label {
+    font-weight: bold;
+    font-size: 1.4rem;
+    color: white;
+}
+
+.container {
+    background-color: #EDE0C2;
+    height: auto;
+    width: 40vw;
+    padding: 2em;
+}
+
+.btn-primary {
+    background-color: #60DCE6;
+    border: 1px solid #5969D3;
+    font-weight: bold;
+    padding: 0.6em;
+    margin-right: 0.6em;
+}
+
+a {
+    text-decoration: none;
+}
