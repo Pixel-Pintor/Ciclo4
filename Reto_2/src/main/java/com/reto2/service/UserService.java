@@ -2,43 +2,50 @@ package com.reto2.service;
 
 import com.reto2.model.User;
 import com.reto2.repository.UserRepository;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
-
+/**
+ *
+ * @author desarrolloextremo
+ */
 @Service
 public class UserService {
 
     @Autowired
     private UserRepository userRepository;
-
-    public List<User> listUsers() {
-        return userRepository.getUsers();
+    
+    public Optional<User> getUser(int id) {
+        return userRepository.getUser(id);
     }
 
-    public boolean checkUserEmail(String email) {
-        return userRepository.checkEmail(email);
+    public List<User> listAll() {
+        return userRepository.listAll();
     }
 
-    public User checkUserEmailAndPassword(String email, String password) {
-        Optional<User> user = userRepository.checkEmailAndPassword(email, password);
+    public boolean emailExists(String email) {
+        return userRepository.emailExists(email);
+    }
 
-        if (user.isEmpty()) {
+    public User authenticateUser(String email, String password) {
+        Optional<User> usuario = userRepository.authenticateUser(email, password);
+
+        if (usuario.isEmpty()) {
             return new User();
         } else {
-            return user.get();
+            return usuario.get();
         }
     }
 
-    public User createUser(User user) {
+    public User create(User user) {
         if (user.getId() == null) {
             return user;
         } else {
-            Optional<User> getUser = userRepository.getUserById(user.getId());
-            if (getUser.isEmpty()) {
-                if (!checkUserEmail(user.getEmail())) {
+            Optional<User> e = userRepository.getUser(user.getId());
+            if (e.isEmpty()) {
+                if (!emailExists(user.getEmail())) {
                     return userRepository.create(user);
                 } else {
                     return user;
@@ -49,34 +56,34 @@ public class UserService {
         }
     }
 
-    public User updateUser(User user) {
+    public User update(User user) {
         if (user.getId() != null) {
-            Optional<User> userCheck = userRepository.getUserById(user.getId());
-            if (userCheck.isPresent()) {
+            Optional<User> userDb = userRepository.getUser(user.getId());
+            if (userDb.isPresent()) {
                 if (user.getIdentification() != null) {
-                    userCheck.get().setIdentification(user.getIdentification());
+                    userDb.get().setIdentification(user.getIdentification());
                 }
                 if (user.getName() != null) {
-                    userCheck.get().setName(user.getName());
+                    userDb.get().setName(user.getName());
                 }
                 if (user.getAddress() != null) {
-                    userCheck.get().setAddress(user.getAddress());
+                    userDb.get().setAddress(user.getAddress());
                 }
                 if (user.getCellPhone() != null) {
-                    userCheck.get().setCellPhone(user.getCellPhone());
+                    userDb.get().setCellPhone(user.getCellPhone());
                 }
                 if (user.getEmail() != null) {
-                    userCheck.get().setEmail(user.getEmail());
+                    userDb.get().setEmail(user.getEmail());
                 }
                 if (user.getPassword() != null) {
-                    userCheck.get().setPassword(user.getPassword());
+                    userDb.get().setPassword(user.getPassword());
                 }
                 if (user.getZone() != null) {
-                    userCheck.get().setZone(user.getZone());
+                    userDb.get().setZone(user.getZone());
                 }
 
-                userRepository.update(userCheck.get());
-                return userCheck.get();
+                userRepository.update(userDb.get());
+                return userDb.get();
             } else {
                 return user;
             }
@@ -85,10 +92,14 @@ public class UserService {
         }
     }
 
-    public boolean deleteUser(int id) {
-        return userRepository.getUserById(id).map(user -> {
-            userRepository.deleteUser(id);
+    public boolean delete(int userId) {
+        Optional<User> user = getUser(userId);
+        
+        if (user.isEmpty()){
+            return false;
+        }else{
+            userRepository.delete(user.get());
             return true;
-        }).orElse(false);
+        }
     }
 }

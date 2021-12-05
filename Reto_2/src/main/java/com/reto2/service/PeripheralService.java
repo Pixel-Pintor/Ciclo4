@@ -2,11 +2,11 @@ package com.reto2.service;
 
 import com.reto2.model.Peripheral;
 import com.reto2.repository.PeripheralRepository;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
 
 @Service
 public class PeripheralService {
@@ -14,48 +14,48 @@ public class PeripheralService {
     @Autowired
     private PeripheralRepository peripheralRepository;
 
-    public List<Peripheral> listPeripherals() {
-        return peripheralRepository.getPeripherals();
+    public List<Peripheral> listAll() {
+        return peripheralRepository.listAll();
     }
 
-    public Peripheral createPeripheral(Peripheral peripheral) {
-        if (peripheral.getReference() == null) {
-            return peripheralRepository.create(peripheral);
+    public Optional<Peripheral> getSupplement(String reference) {
+        return peripheralRepository.getPeripheral(reference);
+    }
+
+    public Peripheral create(Peripheral supplement) {
+        if (supplement.getReference() == null) {
+            return supplement;
         } else {
-            Optional<Peripheral> periAux = peripheralRepository.getPeripheralByReference(peripheral.getReference());
-            if (periAux.isEmpty()) {
-                return peripheralRepository.createPeripheral(peripheral);
-            } else {
-                return peripheral;
-            }
+            return peripheralRepository.create(supplement);
         }
     }
 
-    public Peripheral updatePeripheral(Peripheral peripheral) {
+    public Peripheral update(Peripheral peripheral) {
+
         if (peripheral.getReference() != null) {
-            Optional<Peripheral> peripheralCheck = peripheralRepository.getPeripheralByReference(peripheral.getReference());
-            if (peripheralCheck.isPresent()) {
+            Optional<Peripheral> supplementDb = peripheralRepository.getPeripheral(peripheral.getReference());
+            if (!supplementDb.isEmpty()) {
+                if (peripheral.getBrand() != null) {
+                    supplementDb.get().setBrand(peripheral.getBrand());
+                }
                 if (peripheral.getCategory() != null) {
-                    peripheralCheck.get().setCategory(peripheral.getCategory());
+                    supplementDb.get().setCategory(peripheral.getCategory());
                 }
                 if (peripheral.getDescription() != null) {
-                    peripheralCheck.get().setDescription(peripheral.getDescription());
+                    supplementDb.get().setDescription(peripheral.getDescription());
                 }
-                if (peripheral.getPrice() != null) {
-                    peripheralCheck.get().setPrice(peripheral.getPrice());
+                if (peripheral.getPrice() != 0.0) {
+                    supplementDb.get().setPrice(peripheral.getPrice());
                 }
-                if (peripheral.getAvailability() != null) {
-                    peripheralCheck.get().setAvailability(peripheral.getAvailability());
-                }
-                if (peripheral.getQuantity() != null) {
-                    peripheralCheck.get().setQuantity(peripheral.getQuantity());
+                if (peripheral.getQuantity() != 0) {
+                    supplementDb.get().setQuantity(peripheral.getQuantity());
                 }
                 if (peripheral.getPhotography() != null) {
-                    peripheralCheck.get().setPhotography(peripheral.getPhotography());
+                    supplementDb.get().setPhotography(peripheral.getPhotography());
                 }
-
-                peripheralRepository.update(peripheralCheck.get());
-                return peripheralCheck.get();
+                supplementDb.get().setAvailability(peripheral.isAvailability());
+                peripheralRepository.update(supplementDb.get());
+                return supplementDb.get();
             } else {
                 return peripheral;
             }
@@ -64,10 +64,11 @@ public class PeripheralService {
         }
     }
 
-    public boolean deletePeripheral(String reference) {
-        return peripheralRepository.getPeripheralByReference(reference).map(peripheral -> {
-            peripheralRepository.deletePeripheral(reference);
+    public boolean delete(String reference) {
+        Boolean aBoolean = getSupplement(reference).map(supplement -> {
+            peripheralRepository.delete(supplement);
             return true;
         }).orElse(false);
+        return aBoolean;
     }
 }
